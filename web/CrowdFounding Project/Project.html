@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <title>Project</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css" id="hljs-theme">
+  <style>
+    :root[data-theme="dark"]{--bg:#0b0f12;--panel:#0f1720;--text:#e6eef6;--muted:#98a0ac;--accent:#4cc9f0;--border:rgba(255,255,255,0.07);--hover:rgba(255,255,255,0.05)}
+    :root[data-theme="light"]{--bg:#f5f7fa;--panel:#ffffff;--text:#1a202c;--muted:#718096;--accent:#0066cc;--border:rgba(0,0,0,0.1);--hover:rgba(0,0,0,0.03)}
+    *{box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:0;transition:background 0.2s,color 0.2s}
+    .top-bar{background:var(--panel);border-bottom:1px solid var(--border);padding:12px 24px;position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .breadcrumb{font-size:13px;color:var(--muted)}
+    .breadcrumb a{color:var(--accent);text-decoration:none}
+    .breadcrumb a:hover{text-decoration:underline}
+    .breadcrumb-sep{margin:0 6px;opacity:0.5}
+    .breadcrumb-file{color:var(--text);font-weight:500}
+    .top-actions{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:background 0.15s}
+    .btn:hover{background:var(--hover)}
+    .theme-toggle{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px;display:flex;gap:4px}
+    .theme-toggle button{background:transparent;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--muted);transition:all 0.15s}
+    .theme-toggle button.active{background:var(--accent);color:white}
+    .wrap{max-width:1200px;margin:0 auto;padding:24px;display:grid;grid-template-columns:200px 1fr;gap:24px}
+    .sidebar{position:sticky;top:80px;height:fit-content;max-height:calc(100vh - 120px);overflow-y:auto}
+    .toc{background:var(--panel);padding:16px;border-radius:12px;border:1px solid var(--border)}
+    .toc h3{margin:0 0 12px 0;font-size:13px;text-transform:uppercase;letter-spacing:0.5px;color:var(--muted)}
+    .toc ul{list-style:none;padding:0;margin:0}
+    .toc li{margin:4px 0}
+    .toc a{color:var(--text);text-decoration:none;font-size:13px;display:block;padding:4px 8px;border-radius:4px;transition:background 0.15s}
+    .toc a:hover{background:var(--hover)}
+    .toc li.level-2{padding-left:12px}
+    .toc li.level-3{padding-left:24px}
+    .main-content{min-width:0}
+    .file-meta-box{background:var(--panel);padding:16px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border);display:flex;flex-wrap:wrap;gap:16px;font-size:13px}
+    .meta-item{display:flex;align-items:center;gap:6px;color:var(--muted)}
+    .meta-item strong{color:var(--text)}
+    main{background:var(--panel);padding:32px;border-radius:12px;border:1px solid var(--border);box-shadow:0 4px 12px rgba(0,0,0,0.1)}
+    main h1,main h2,main h3,main h4,main h5,main h6{color:var(--text);margin-top:24px;margin-bottom:12px}
+    main h1{font-size:32px;border-bottom:2px solid var(--border);padding-bottom:12px}
+    main h2{font-size:24px}
+    main h3{font-size:20px}
+    main p,main li{line-height:1.7;color:var(--text)}
+    main ul,main ol{margin-left:1.5em}
+    main pre{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:16px;overflow-x:auto}
+    main code{background:var(--bg);padding:2px 6px;border-radius:4px;font-size:0.9em;border:1px solid var(--border)}
+    main pre code{background:transparent;padding:0;border:none}
+    main table{border-collapse:collapse;width:100%;margin:16px 0}
+    main th,main td{border:1px solid var(--border);padding:8px 12px;text-align:left}
+    main th{background:var(--bg);font-weight:600}
+    main blockquote{border-left:4px solid var(--accent);padding-left:16px;margin:16px 0;color:var(--muted);font-style:italic}
+    main a{color:var(--accent);text-decoration:none}
+    main a:hover{text-decoration:underline}
+    main img{max-width:100%;height:auto;border-radius:8px;margin:16px 0}
+    footer{text-align:center;color:var(--muted);margin-top:32px;font-size:13px;padding:24px}
+    .tag{background:var(--accent);color:white;padding:2px 8px;border-radius:12px;font-size:11px;display:inline-block}
+    @media print{.top-bar,.sidebar,.top-actions{display:none}.wrap{grid-template-columns:1fr}}
+    @media (max-width:900px){.wrap{grid-template-columns:1fr}.sidebar{display:none}}
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="breadcrumb"><a href="../preview.html">Home</a><span class="breadcrumb-sep">/</span><span class="breadcrumb-folder">CrowdFounding Project</span><span class="breadcrumb-sep">/</span><span class="breadcrumb-file">Project.md</span></div>
+    <div class="top-actions">
+      <div class="theme-toggle">
+        <button onclick="setTheme('dark')" data-theme="dark" class="active">🌙</button>
+        <button onclick="setTheme('light')" data-theme="light">☀️</button>
+      </div>
+      <select id="hljs-selector" class="btn" onchange="changeCodeTheme(this.value)">
+        <option value="atom-one-dark">Atom One Dark</option>
+        <option value="github-dark">GitHub Dark</option>
+        <option value="monokai">Monokai</option>
+        <option value="nord">Nord</option>
+        <option value="dracula">Dracula</option>
+      </select>
+      <a href="../editor.html?file=CrowdFounding Project/Project.md" class="btn">✏️ Modifica</a>
+      <button onclick="exportPDF()" class="btn">📄 PDF</button>
+      <button onclick="toggleFavorite()" class="btn" id="fav-btn">⭐</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <aside class="sidebar">
+      <div class="toc">
+        <h3>Contenuti</h3>
+        <ul id="toc-list"></ul>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <div class="file-meta-box">
+        <div class="meta-item">📅 Modificato: <strong>04/12/2025 11:15</strong></div>
+        <div class="meta-item">📝 Parole: <strong>2</strong></div>
+        <div class="meta-item">⏱️ Lettura: <strong>1 min</strong></div>
+        <div class="meta-item">💾 Dimensione: <strong>24 bytes</strong></div>
+      </div>
+      
+      <main id="content">Caricamento…</main>
+    </div>
+  </div>
+
+  <footer>
+    File sorgente: <code>CrowdFounding Project\Project.md</code>
+  </footer>
+
+  <script id="md-content" type="text/plain">## CrowdFounding inglese</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/5.1.1/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+  <script>
+    // Gestione tema
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      document.querySelectorAll('.theme-toggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.theme === theme);
+      });
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+
+    // Gestione code theme
+    function changeCodeTheme(theme) {
+      const link = document.getElementById('hljs-theme');
+      link.href = `https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/${theme}.min.css`;
+      localStorage.setItem('codeTheme', theme);
+    }
+    const savedCodeTheme = localStorage.getItem('codeTheme') || 'atom-one-dark';
+    document.getElementById('hljs-selector').value = savedCodeTheme;
+    changeCodeTheme(savedCodeTheme);
+
+    // Render markdown
+    const md = document.getElementById('md-content').textContent;
+    const content = document.getElementById('content');
+    marked.setOptions({ headerIds: true, mangle: false });
+    content.innerHTML = marked.parse(md);
+    document.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+
+    // Genera TOC
+    const headers = content.querySelectorAll('h1, h2, h3');
+    const tocList = document.getElementById('toc-list');
+    headers.forEach(h => {
+      const li = document.createElement('li');
+      li.className = 'level-' + h.tagName.substring(1);
+      const a = document.createElement('a');
+      a.textContent = h.textContent;
+      a.href = '#' + h.id;
+      a.onclick = (e) => {
+        e.preventDefault();
+        h.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+      li.appendChild(a);
+      tocList.appendChild(li);
+    });
+
+    // Favoriti
+    function toggleFavorite() {
+      const path = 'CrowdFounding Project/Project.md';
+      let favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+      const index = favs.indexOf(path);
+      if (index > -1) {
+        favs.splice(index, 1);
+        document.getElementById('fav-btn').textContent = '⭐';
+      } else {
+        favs.push(path);
+        document.getElementById('fav-btn').textContent = '⭐✨';
+      }
+      localStorage.setItem('favorites', JSON.stringify(favs));
+    }
+    const path = 'CrowdFounding Project/Project.md';
+    const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+    if (favs.includes(path)) {
+      document.getElementById('fav-btn').textContent = '⭐✨';
+    }
+
+    // Export PDF
+    function exportPDF() {
+      window.print();
+    }
+
+    // Recent files
+    let recent = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+    recent = recent.filter(r => r !== path);
+    recent.unshift(path);
+    recent = recent.slice(0, 20);
+    localStorage.setItem('recentFiles', JSON.stringify(recent));
+
+    // Auto-reload
+    let lastCheck = Date.now();
+    setInterval(() => {
+      fetch(location.href, {method: 'HEAD', cache: 'no-cache'})
+        .then(res => {
+          const lastMod = res.headers.get('last-modified');
+          if (lastMod && new Date(lastMod).getTime() > lastCheck) {
+            if (Notification.permission === 'granted') {
+              new Notification('File aggiornato', {body: 'Project.md'});
+            }
+            location.reload();
+          }
+        }).catch(() => {});
+    }, 2000);
+
+    // Chiedi permesso notifiche
+    if (Notification.permission === 'default') {
+      Notification.requestPermission();
+    }
+  </script>
+</body>
+</html>

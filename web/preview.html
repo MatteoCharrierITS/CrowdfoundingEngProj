@@ -1,0 +1,307 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <title>Documenti Markdown - AppuntiApp</title>
+  <style>
+    :root[data-theme="dark"]{--bg:#0b0f12;--panel:#0f1720;--text:#e6eef6;--muted:#98a0ac;--accent:#4cc9f0;--border:rgba(255,255,255,0.07);--hover:rgba(255,255,255,0.05)}
+    :root[data-theme="light"]{--bg:#f5f7fa;--panel:#ffffff;--text:#1a202c;--muted:#718096;--accent:#0066cc;--border:rgba(0,0,0,0.1);--hover:rgba(0,0,0,0.03)}
+    *{box-sizing:border-box}
+    body{background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;margin:0;padding:28px;transition:background 0.2s,color 0.2s}
+    .wrap{max-width:1200px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    h1{font-size:28px;margin:0}
+    .meta{color:var(--muted);font-size:13px}
+    .header-actions{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;transition:background 0.15s}
+    .btn:hover{background:var(--hover)}
+    .theme-toggle{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px;display:flex;gap:4px}
+    .theme-toggle button{background:transparent;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--muted);transition:all 0.15s}
+    .theme-toggle button.active{background:var(--accent);color:white}
+    .search-box{margin-top:20px;background:var(--panel);padding:16px;border-radius:12px;border:1px solid var(--border)}
+    .search-input{width:100%;padding:12px;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:14px}
+    .search-input:focus{outline:none;border-color:var(--accent)}
+    .filters{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+    .filter-btn{padding:6px 12px;background:var(--bg);border:1px solid var(--border);border-radius:6px;cursor:pointer;font-size:12px;color:var(--text);transition:all 0.15s}
+    .filter-btn:hover{background:var(--hover)}
+    .filter-btn.active{background:var(--accent);color:white;border-color:var(--accent)}
+    .tags-cloud{margin-top:12px;display:flex;flex-wrap:wrap;gap:8px}
+    .tag-cloud-item{padding:4px 10px;background:var(--panel);border:1px solid var(--border);border-radius:12px;font-size:11px;cursor:pointer;transition:all 0.15s}
+    .tag-cloud-item:hover{background:var(--accent);color:white}
+    main{margin-top:20px;display:grid;grid-template-columns:340px 1fr;gap:20px}
+    .panel{background:var(--panel);padding:20px;border-radius:12px;border:1px solid var(--border)}
+    .list{overflow-y:auto;max-height:calc(100vh - 300px)}
+    .list h3{margin:0 0 16px 0;color:var(--accent);font-size:16px}
+    .folder-item{margin-bottom:4px}
+    .folder-header{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer;border-radius:8px;transition:background 0.15s;font-weight:500}
+    .folder-header:hover{background:var(--hover)}
+    .folder-icon{font-size:16px}
+    .folder-name{font-size:14px}
+    .folder-content{margin-left:20px;display:none;margin-top:6px}
+    .folder-content.open{display:block}
+    .file-item{display:flex;flex-direction:column;gap:4px;color:var(--text);text-decoration:none;padding:10px;border-radius:8px;margin-bottom:4px;border:1px solid var(--border);transition:all 0.15s;position:relative}
+    .file-item:hover{background:var(--hover);border-color:var(--accent);transform:translateX(4px)}
+    .file-item-header{display:flex;align-items:center;gap:8px}
+    .file-icon{font-size:16px}
+    .file-name{font-size:13px;font-weight:500;flex:1}
+    .file-meta{font-size:11px;color:var(--muted);margin-top:2px}
+    .file-tags{display:flex;gap:4px;margin-top:6px;flex-wrap:wrap}
+    .tag{background:var(--accent);color:white;padding:2px 8px;border-radius:10px;font-size:10px}
+    .side-panel h3{margin:0 0 16px 0;color:var(--accent);font-size:16px}
+    .tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--border)}
+    .tab{padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;font-size:13px}
+    .tab:hover{color:var(--accent)}
+    .tab.active{border-bottom-color:var(--accent);color:var(--accent);font-weight:500}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .recent-item,.fav-item{display:flex;align-items:center;gap:8px;padding:8px;border-radius:6px;margin-bottom:4px;border:1px solid var(--border);font-size:13px;color:var(--text);text-decoration:none;transition:background 0.15s}
+    .recent-item:hover,.fav-item:hover{background:var(--hover)}
+    .stats-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-bottom:16px}
+    .stat-box{background:var(--bg);padding:12px;border-radius:8px;border:1px solid var(--border)}
+    .stat-label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px}
+    .stat-value{font-size:20px;font-weight:600;color:var(--text);margin-top:4px}
+    footer{text-align:center;color:var(--muted);margin-top:32px;font-size:13px}
+    .empty{color:var(--muted);font-size:14px;text-align:center;padding:40px}
+    .no-results{display:none;text-align:center;padding:40px;color:var(--muted)}
+    @media (max-width:900px){main{grid-template-columns:1fr}.side-panel{order:-1}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <h1>📚 AppuntiApp</h1>
+        <div class="meta">1 documenti • AppuntiApp-main</div>
+      </div>
+      <div class="header-actions">
+        <div class="theme-toggle">
+          <button onclick="setTheme('dark')" data-theme="dark" class="active">🌙</button>
+          <button onclick="setTheme('light')" data-theme="light">☀️</button>
+        </div>
+        <a href="folders.html" class="btn">📁 Cartelle</a>
+        <a href="stats.html" class="btn">📊 Statistiche</a>
+        <a href="logs.html" class="btn">📋 Log Server</a>
+        <a href="editor.html" class="btn">✨ Nuovo File</a>
+      </div>
+    </header>
+
+    <div class="search-box">
+      <input type="text" class="search-input" id="search-input" placeholder="🔍 Cerca nei documenti... (premi / per focus)">
+      <div class="filters">
+        <button class="filter-btn active" onclick="sortBy('name')">📝 Nome</button>
+        <button class="filter-btn" onclick="sortBy('date')">📅 Data</button>
+        <button class="filter-btn" onclick="sortBy('words')">📊 Parole</button>
+        <button class="filter-btn" onclick="showAll()">🗂️ Tutti</button>
+      </div>
+      <div class="tags-cloud"></div>
+    </div>
+
+    <main>
+      <aside class="panel list" id="file-list">
+        <h3>📂 Documenti</h3>
+<div class="folder-item">
+  <div class="folder-header" onclick="toggleFolder('folder-45833')">
+    <span class="folder-icon">📁</span>
+    <span class="folder-name">CrowdFounding Project</span>
+  </div>
+  <div class="folder-content" id="folder-45833">
+  <a class="file-item" href="CrowdFounding Project/Project.html" data-words="2" data-readtime="1" data-modified="1764843344.2614033">
+    <span class="file-icon">📄</span>
+    <span class="file-name">Project.md</span>
+    <span class="file-meta">2 parole • 1 min</span>
+  </a>
+  </div>
+</div>
+      </aside>
+
+      <section class="panel side-panel">
+        <div class="tabs">
+          <div class="tab active" onclick="switchTab('recent')">🕒 Recenti</div>
+          <div class="tab" onclick="switchTab('favorites')">⭐ Preferiti</div>
+          <div class="tab" onclick="switchTab('stats')">📊 Info</div>
+        </div>
+
+        <div class="tab-content active" id="recent-tab">
+          <div id="recent-list"></div>
+        </div>
+
+        <div class="tab-content" id="favorites-tab">
+          <div id="fav-list"></div>
+        </div>
+
+        <div class="tab-content" id="stats-tab">
+          <div class="stats-grid">
+            <div class="stat-box">
+              <div class="stat-label">File totali</div>
+              <div class="stat-value">1</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">Cartelle</div>
+              <div class="stat-value" id="folder-count">-</div>
+            </div>
+          </div>
+          <a href="stats.html" class="btn" style="display:block;text-align:center">Vedi tutte le statistiche →</a>
+        </div>
+      </section>
+    </main>
+
+    <div class="no-results" id="no-results">
+      <p>Nessun risultato trovato</p>
+    </div>
+
+    <footer>
+      Generato automaticamente • <span id="live-indicator">🔴 Offline</span>
+    </footer>
+  </div>
+
+  <script>
+    // Gestione tema
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      document.querySelectorAll('.theme-toggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.theme === theme);
+      });
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', e => {
+      if (e.key === '/' && e.target.tagName !== 'INPUT') {
+        e.preventDefault();
+        document.getElementById('search-input').focus();
+      }
+      if (e.key === 'Escape') {
+        document.getElementById('search-input').blur();
+        document.getElementById('search-input').value = '';
+        filterFiles('');
+      }
+      if (e.key === 'n' && e.ctrlKey) {
+        e.preventDefault();
+        window.location.href = 'editor.html';
+      }
+    });
+
+    // Ricerca
+    const searchInput = document.getElementById('search-input');
+    let searchTimeout;
+    searchInput.addEventListener('input', e => {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(() => filterFiles(e.target.value), 300);
+    });
+
+    function filterFiles(query) {
+      query = query.toLowerCase();
+      const items = document.querySelectorAll('.file-item');
+      let visibleCount = 0;
+      
+      items.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        const match = text.includes(query);
+        item.style.display = match ? '' : 'none';
+        if (match) visibleCount++;
+      });
+
+      document.getElementById('no-results').style.display = visibleCount === 0 ? 'block' : 'none';
+      document.getElementById('file-list').style.display = visibleCount === 0 ? 'none' : 'block';
+    }
+
+    // Tag cloud
+    document.querySelectorAll('.tag-cloud-item').forEach(tag => {
+      tag.addEventListener('click', () => {
+        searchInput.value = tag.textContent;
+        filterFiles(tag.textContent);
+      });
+    });
+
+    // Folders toggle
+    function toggleFolder(id) {
+      const folder = document.getElementById(id);
+      if (folder) folder.classList.toggle('open');
+    }
+
+    // Espandi tutte le cartelle all'avvio
+    document.querySelectorAll('.folder-content').forEach(f => f.classList.add('open'));
+
+    // Ordinamento
+    function sortBy(type) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+      
+      const items = Array.from(document.querySelectorAll('.file-item'));
+      items.sort((a, b) => {
+        if (type === 'name') return a.querySelector('.file-name').textContent.localeCompare(b.querySelector('.file-name').textContent);
+        if (type === 'date') return parseFloat(b.dataset.modified) - parseFloat(a.dataset.modified);
+        if (type === 'words') return parseInt(b.dataset.words) - parseInt(a.dataset.words);
+        return 0;
+      });
+      
+      // Riattacca al DOM (semplificato - in produzione serve logica più complessa per cartelle)
+      // Per ora lasciamo l'ordinamento base
+    }
+
+    function showAll() {
+      searchInput.value = '';
+      filterFiles('');
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active');
+    }
+
+    // Tabs
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById(tab + '-tab').classList.add('active');
+    }
+
+    // Recenti e Preferiti
+    function loadRecents() {
+      const recent = JSON.parse(localStorage.getItem('recentFiles') || '[]');
+      const container = document.getElementById('recent-list');
+      if (recent.length === 0) {
+        container.innerHTML = '<div class="empty">Nessun file recente</div>';
+        return;
+      }
+      container.innerHTML = recent.slice(0, 10).map(path => 
+        `<a href="${path.replace(/\.md$/, '.html')}" class="recent-item">
+          <span>📄</span>
+          <span>${path.split('/').pop()}</span>
+        </a>`
+      ).join('');
+    }
+
+    function loadFavorites() {
+      const favs = JSON.parse(localStorage.getItem('favorites') || '[]');
+      const container = document.getElementById('fav-list');
+      if (favs.length === 0) {
+        container.innerHTML = '<div class="empty">Nessun preferito</div>';
+        return;
+      }
+      container.innerHTML = favs.map(path => 
+        `<a href="${path.replace(/\.md$/, '.html')}" class="fav-item">
+          <span>⭐</span>
+          <span>${path.split('/').pop()}</span>
+        </a>`
+      ).join('');
+    }
+
+    loadRecents();
+    loadFavorites();
+
+    // Conta cartelle
+    const folderCount = document.querySelectorAll('.folder-item').length;
+    document.getElementById('folder-count').textContent = folderCount;
+
+    // Check server live
+    fetch('/api/files')
+      .then(() => {
+        document.getElementById('live-indicator').innerHTML = '🟢 Live';
+      })
+      .catch(() => {});
+  </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <title>Gestione Cartelle - AppuntiApp</title>
+  <style>
+    :root[data-theme="dark"]{--bg:#0b0f12;--panel:#0f1720;--text:#e6eef6;--muted:#98a0ac;--accent:#4cc9f0;--border:rgba(255,255,255,0.07);--hover:rgba(255,255,255,0.05);--success:#10b981;--error:#ef4444;--warning:#f59e0b}
+    :root[data-theme="light"]{--bg:#f5f7fa;--panel:#ffffff;--text:#1a202c;--muted:#718096;--accent:#0066cc;--border:rgba(0,0,0,0.1);--hover:rgba(0,0,0,0.03);--success:#10b981;--error:#ef4444;--warning:#f59e0b}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;padding:28px;transition:background 0.2s}
+    .wrap{max-width:1000px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    h1{font-size:28px;margin:0}
+    .header-actions{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
+    .btn:hover{background:var(--hover)}
+    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+    .btn.danger{background:var(--error);color:white;border-color:var(--error)}
+    .theme-toggle{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px;display:flex;gap:4px}
+    .theme-toggle button{background:transparent;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--muted);transition:all 0.15s}
+    .theme-toggle button.active{background:var(--accent);color:white}
+    .tree-view{background:var(--panel);padding:20px;border-radius:12px;border:1px solid var(--border)}
+    .tree-item{padding:10px;margin-bottom:4px;border-radius:8px;border:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;transition:all 0.15s}
+    .tree-item:hover{background:var(--hover);border-color:var(--accent)}
+    .tree-item.folder{font-weight:500}
+    .tree-item.file{margin-left:30px;opacity:0.9}
+    .item-info{display:flex;align-items:center;gap:10px;flex:1}
+    .item-icon{font-size:18px}
+    .item-name{font-size:14px}
+    .item-actions{display:flex;gap:6px}
+    .icon-btn{background:transparent;border:1px solid var(--border);padding:6px 10px;border-radius:6px;cursor:pointer;font-size:12px;transition:all 0.15s}
+    .icon-btn:hover{background:var(--hover)}
+    .icon-btn.danger:hover{background:var(--error);color:white;border-color:var(--error)}
+    .modal{display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center}
+    .modal.active{display:flex}
+    .modal-content{background:var(--panel);padding:24px;border-radius:12px;border:1px solid var(--border);max-width:500px;width:90%}
+    .modal-content h2{margin-bottom:16px;font-size:20px}
+    .form-group{margin-bottom:16px}
+    .form-group label{display:block;margin-bottom:6px;font-size:13px;color:var(--muted)}
+    .form-group input{width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px}
+    .form-group input:focus{outline:none;border-color:var(--accent)}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:20px}
+    .notification{position:fixed;top:80px;right:20px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:16px 20px;box-shadow:0 4px 12px rgba(0,0,0,0.2);display:none;z-index:2000;min-width:300px}
+    .notification.show{display:block;animation:slideIn 0.3s}
+    .notification.success{border-left:4px solid var(--success)}
+    .notification.error{border-left:4px solid var(--error)}
+    .notification.warning{border-left:4px solid var(--warning)}
+    @keyframes slideIn{from{transform:translateX(400px);opacity:0}to{transform:translateX(0);opacity:1}}
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+    .loading{text-align:center;padding:40px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>📁 Gestione Cartelle</h1>
+      <div class="header-actions">
+        <div class="theme-toggle">
+          <button onclick="setTheme('dark')" data-theme="dark" class="active">🌙</button>
+          <button onclick="setTheme('light')" data-theme="light">☀️</button>
+        </div>
+        <button class="btn primary" onclick="showCreateModal()">➕ Nuova Cartella</button>
+        <a href="preview.html" class="btn">← Indietro</a>
+      </div>
+    </header>
+
+    <div class="loading" id="loading">Caricamento struttura...</div>
+
+    <div class="tree-view" id="tree-view" style="display:none">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- Create Folder Modal -->
+  <div class="modal" id="create-modal">
+    <div class="modal-content">
+      <h2>Crea Nuova Cartella</h2>
+      <div class="form-group">
+        <label>Nome Cartella</label>
+        <input type="text" id="folder-name" placeholder="es: Nuovo Corso">
+      </div>
+      <div class="form-group">
+        <label>Percorso Padre (opzionale)</label>
+        <input type="text" id="folder-parent" placeholder="es: Corsi/Anno1 o lascia vuoto per root">
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('create-modal')">Annulla</button>
+        <button class="btn primary" onclick="createFolder()">Crea</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rename Modal -->
+  <div class="modal" id="rename-modal">
+    <div class="modal-content">
+      <h2>Rinomina</h2>
+      <div class="form-group">
+        <label>Nuovo Nome</label>
+        <input type="text" id="rename-name">
+      </div>
+      <input type="hidden" id="rename-path">
+      <input type="hidden" id="rename-type">
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('rename-modal')">Annulla</button>
+        <button class="btn primary" onclick="confirmRename()">Rinomina</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm Modal -->
+  <div class="modal" id="delete-modal">
+    <div class="modal-content">
+      <h2>⚠️ Conferma Eliminazione</h2>
+      <p style="margin:16px 0;color:var(--muted)">Sei sicuro di voler eliminare "<span id="delete-name"></span>"?</p>
+      <p style="color:var(--warning);font-size:13px">Questa azione non può essere annullata.</p>
+      <input type="hidden" id="delete-path">
+      <input type="hidden" id="delete-type">
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('delete-modal')">Annulla</button>
+        <button class="btn danger" onclick="confirmDelete()">Elimina</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Move File Modal -->
+  <div class="modal" id="move-modal">
+    <div class="modal-content">
+      <h2>📦 Sposta File</h2>
+      <p style="margin:12px 0;color:var(--muted)">File: <strong><span id="move-name"></span></strong></p>
+      <div class="form-group">
+        <label>Cartella di destinazione</label>
+        <select id="move-destination" style="width:100%;padding:10px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:14px">
+          <option value="">Root (cartella principale)</option>
+        </select>
+      </div>
+      <input type="hidden" id="move-path">
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal('move-modal')">Annulla</button>
+        <button class="btn primary" onclick="confirmMove()">Sposta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification -->
+  <div class="notification" id="notification"></div>
+
+  <script>
+    let fileTree = null;
+
+    // Gestione tema
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      document.querySelectorAll('.theme-toggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.theme === theme);
+      });
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+
+    // Load tree
+    async function loadTree() {
+      try {
+        const res = await fetch('/api/files');
+        fileTree = await res.json();
+        renderTree(fileTree);
+        document.getElementById('loading').style.display = 'none';
+        document.getElementById('tree-view').style.display = 'block';
+      } catch (e) {
+        document.getElementById('loading').innerHTML = '<p style="color:var(--error)">Errore: Server non disponibile</p>';
+      }
+    }
+
+    function renderTree(node, path = '', level = 0) {
+      const container = document.getElementById('tree-view');
+      if (level === 0) container.innerHTML = '';
+
+      if (node.type === 'folder' && node.children) {
+        // Cartelle
+        const folders = node.children.filter(c => c.type === 'folder');
+        folders.forEach(folder => {
+          const folderPath = path ? `${path}/${folder.name}` : folder.name;
+          const item = document.createElement('div');
+          item.className = 'tree-item folder';
+          item.style.marginLeft = (level * 20) + 'px';
+          item.innerHTML = `
+            <div class="item-info">
+              <span class="item-icon">📁</span>
+              <span class="item-name">${folder.name}</span>
+              <span style="font-size:11px;color:var(--muted)">${folder.children ? folder.children.length : 0} elementi</span>
+            </div>
+            <div class="item-actions">
+              <button class="icon-btn" onclick="showRenameModal('${folderPath}', 'folder', '${folder.name}')" title="Rinomina cartella">✏️</button>
+              <button class="icon-btn danger" onclick="showDeleteModal('${folderPath}', 'folder', '${folder.name}')" title="Elimina cartella">🗑️</button>
+            </div>
+          `;
+          container.appendChild(item);
+          
+          // Ricorsione
+          renderTree(folder, folderPath, level + 1);
+        });
+
+        // File
+        const files = node.children.filter(c => c.type === 'file');
+        files.forEach(file => {
+          const filePath = file.path;
+          const item = document.createElement('div');
+          item.className = 'tree-item file';
+          item.style.marginLeft = ((level + 1) * 20) + 'px';
+          item.innerHTML = `
+            <div class="item-info">
+              <span class="item-icon">📄</span>
+              <span class="item-name">${file.name}</span>
+            </div>
+            <div class="item-actions">
+              <a href="${filePath.replace(/\.md$/, '.html')}" class="icon-btn" target="_blank" title="Visualizza file">👁️</a>
+              <a href="editor.html?file=${filePath}" class="icon-btn" title="Modifica nel editor">✏️</a>
+              <button class="icon-btn" onclick="showRenameModal('${filePath}', 'file', '${file.name}')" title="Rinomina file">✏️</button>
+              <button class="icon-btn" onclick="showMoveModal('${filePath}', '${file.name}')" title="Sposta file">📦</button>
+              <button class="icon-btn danger" onclick="showDeleteModal('${filePath}', 'file', '${file.name}')" title="Elimina file">🗑️</button>
+            </div>
+          `;
+          container.appendChild(item);
+        });
+      }
+    }
+
+    // Modals
+    function showCreateModal() {
+      document.getElementById('create-modal').classList.add('active');
+      document.getElementById('folder-name').value = '';
+      document.getElementById('folder-parent').value = '';
+    }
+
+    function showRenameModal(path, type, currentName) {
+      document.getElementById('rename-modal').classList.add('active');
+      document.getElementById('rename-path').value = path;
+      document.getElementById('rename-type').value = type;
+      document.getElementById('rename-name').value = currentName;
+    }
+
+    function showDeleteModal(path, type, name) {
+      document.getElementById('delete-modal').classList.add('active');
+      document.getElementById('delete-path').value = path;
+      document.getElementById('delete-type').value = type;
+      document.getElementById('delete-name').textContent = name;
+    }
+
+    function showMoveModal(path, name) {
+      document.getElementById('move-modal').classList.add('active');
+      document.getElementById('move-path').value = path;
+      document.getElementById('move-name').textContent = name;
+      
+      // Popola dropdown con tutte le cartelle disponibili
+      const select = document.getElementById('move-destination');
+      select.innerHTML = '<option value="">Root (cartella principale)</option>';
+      
+      const folders = extractAllFolders(fileTree);
+      folders.forEach(folder => {
+        const option = document.createElement('option');
+        option.value = folder;
+        option.textContent = '📁 ' + folder;
+        select.appendChild(option);
+      });
+    }
+
+    function extractAllFolders(node, prefix = '') {
+      const folders = [];
+      if (node.type === 'folder' && node.children) {
+        node.children.filter(c => c.type === 'folder').forEach(folder => {
+          const folderPath = prefix ? `${prefix}/${folder.name}` : folder.name;
+          folders.push(folderPath);
+          folders.push(...extractAllFolders(folder, folderPath));
+        });
+      }
+      return folders;
+    }
+
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('active');
+    }
+
+    // Actions
+    async function createFolder() {
+      const name = document.getElementById('folder-name').value.trim();
+      const parent = document.getElementById('folder-parent').value.trim();
+
+      if (!name) {
+        showNotification('Inserisci un nome', 'warning');
+        return;
+      }
+
+      const path = parent ? `${parent}/${name}` : name;
+
+      try {
+        const res = await fetch('/api/folder', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ path })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          showNotification('Cartella creata con successo', 'success');
+          closeModal('create-modal');
+          setTimeout(() => loadTree(), 500);
+        } else {
+          showNotification('Errore: ' + (data.error || 'Unknown'), 'error');
+        }
+      } catch (e) {
+        showNotification('Errore durante la creazione', 'error');
+      }
+    }
+
+    async function confirmRename() {
+      const path = document.getElementById('rename-path').value;
+      const type = document.getElementById('rename-type').value;
+      const newName = document.getElementById('rename-name').value.trim();
+
+      if (!newName) {
+        showNotification('Inserisci un nome', 'warning');
+        return;
+      }
+
+      const endpoint = type === 'folder' ? `/api/folder/${path}/rename` : `/api/file/${path}/rename`;
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ new_name: newName })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          showNotification('Rinominato con successo', 'success');
+          closeModal('rename-modal');
+          setTimeout(() => loadTree(), 500);
+        } else {
+          showNotification('Errore: ' + (data.error || 'Unknown'), 'error');
+        }
+      } catch (e) {
+        showNotification('Errore durante la rinomina', 'error');
+      }
+    }
+
+    async function confirmDelete() {
+      const path = document.getElementById('delete-path').value;
+      const type = document.getElementById('delete-type').value;
+
+      const endpoint = type === 'folder' ? `/api/folder/${path}` : `/api/file/${path}`;
+
+      try {
+        const res = await fetch(endpoint, { method: 'DELETE' });
+        const data = await res.json();
+        
+        if (data.ok) {
+          showNotification('Eliminato con successo', 'success');
+          closeModal('delete-modal');
+          setTimeout(() => loadTree(), 500);
+        } else {
+          showNotification('Errore: ' + (data.error || 'Unknown'), 'error');
+        }
+      } catch (e) {
+        showNotification('Errore durante l\'eliminazione', 'error');
+      }
+    }
+
+    async function confirmMove() {
+      const path = document.getElementById('move-path').value;
+      const destination = document.getElementById('move-destination').value;
+
+      try {
+        const res = await fetch(`/api/file/${path}/move`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destination })
+        });
+
+        const data = await res.json();
+        if (data.ok) {
+          showNotification('File spostato con successo', 'success');
+          closeModal('move-modal');
+          setTimeout(() => loadTree(), 500);
+        } else {
+          showNotification('Errore: ' + (data.error || 'Unknown'), 'error');
+        }
+      } catch (e) {
+        showNotification('Errore durante lo spostamento', 'error');
+      }
+    }
+
+    // Notifications
+    function showNotification(message, type = 'success') {
+      const notif = document.getElementById('notification');
+      notif.textContent = message;
+      notif.className = `notification ${type} show`;
+      setTimeout(() => {
+        notif.classList.remove('show');
+      }, 3000);
+    }
+
+    // Close modal on outside click
+    document.querySelectorAll('.modal').forEach(modal => {
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.classList.remove('active');
+        }
+      });
+    });
+
+    // Init
+    loadTree();
+  </script>
+</body>
+</html>

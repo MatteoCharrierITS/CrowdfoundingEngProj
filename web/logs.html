@@ -1,0 +1,256 @@
+<!doctype html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <title>Log Server - AppuntiApp</title>
+  <style>
+    :root[data-theme="dark"]{--bg:#0b0f12;--panel:#0f1720;--text:#e6eef6;--muted:#98a0ac;--accent:#4cc9f0;--border:rgba(255,255,255,0.07);--hover:rgba(255,255,255,0.05);--success:#10b981;--error:#ef4444;--warning:#f59e0b;--info:#3b82f6}
+    :root[data-theme="light"]{--bg:#f5f7fa;--panel:#ffffff;--text:#1a202c;--muted:#718096;--accent:#0066cc;--border:rgba(0,0,0,0.1);--hover:rgba(0,0,0,0.03);--success:#10b981;--error:#ef4444;--warning:#f59e0b;--info:#3b82f6}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Roboto,Arial,sans-serif;padding:28px;transition:background 0.2s}
+    .wrap{max-width:1400px;margin:0 auto}
+    header{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px;flex-wrap:wrap;gap:12px}
+    h1{font-size:28px;margin:0}
+    .header-actions{display:flex;gap:8px;align-items:center}
+    .btn{background:transparent;border:1px solid var(--border);color:var(--text);padding:8px 16px;border-radius:8px;cursor:pointer;font-size:13px;text-decoration:none;transition:all 0.15s;display:inline-flex;align-items:center;gap:6px}
+    .btn:hover{background:var(--hover)}
+    .btn.primary{background:var(--accent);color:white;border-color:var(--accent)}
+    .theme-toggle{background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:4px;display:flex;gap:4px}
+    .theme-toggle button{background:transparent;border:none;padding:4px 8px;border-radius:4px;cursor:pointer;font-size:12px;color:var(--muted);transition:all 0.15s}
+    .theme-toggle button.active{background:var(--accent);color:white}
+    .log-panels{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:20px}
+    .log-panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .panel-header{background:var(--bg);padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+    .panel-title{font-size:16px;font-weight:600;display:flex;align-items:center;gap:8px}
+    .status-indicator{width:8px;height:8px;border-radius:50%;background:var(--success);animation:pulse 2s infinite}
+    .status-indicator.inactive{background:var(--muted);animation:none}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .log-content{padding:16px;height:400px;overflow-y:auto;font-family:'Fira Code',Consolas,Monaco,monospace;font-size:12px;line-height:1.6;background:var(--bg)}
+    .log-entry{padding:4px 8px;margin-bottom:2px;border-radius:4px;white-space:pre-wrap;word-break:break-all}
+    .log-entry.info{color:var(--info)}
+    .log-entry.success{color:var(--success)}
+    .log-entry.error{color:var(--error);background:rgba(239,68,68,0.1)}
+    .log-entry.warning{color:var(--warning)}
+    .log-entry.system{color:var(--muted);font-style:italic}
+    .log-timestamp{color:var(--muted);margin-right:8px}
+    .controls{background:var(--panel);padding:16px;border-radius:12px;border:1px solid var(--border);margin-bottom:20px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+    .control-group{display:flex;align-items:center;gap:8px}
+    .control-group label{font-size:13px;color:var(--muted)}
+    .switch{position:relative;display:inline-block;width:44px;height:24px}
+    .switch input{opacity:0;width:0;height:0}
+    .slider{position:absolute;cursor:pointer;top:0;left:0;right:0;bottom:0;background:var(--border);border-radius:24px;transition:0.3s}
+    .slider:before{position:absolute;content:"";height:18px;width:18px;left:3px;bottom:3px;background:white;border-radius:50%;transition:0.3s}
+    input:checked + .slider{background:var(--accent)}
+    input:checked + .slider:before{transform:translateX(20px)}
+    .empty-state{text-align:center;padding:60px 20px;color:var(--muted)}
+    @media (max-width:900px){.log-panels{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>📊 Log Server</h1>
+      <div class="header-actions">
+        <div class="theme-toggle">
+          <button onclick="setTheme('dark')" data-theme="dark" class="active">🌙</button>
+          <button onclick="setTheme('light')" data-theme="light">☀️</button>
+        </div>
+        <a href="preview.html" class="btn">← Indietro</a>
+      </div>
+    </header>
+
+    <div class="controls">
+      <div class="control-group">
+        <label class="switch">
+          <input type="checkbox" id="auto-scroll" checked>
+          <span class="slider"></span>
+        </label>
+        <label for="auto-scroll">Auto-scroll</label>
+      </div>
+      <div class="control-group">
+        <label class="switch">
+          <input type="checkbox" id="auto-refresh" checked>
+          <span class="slider"></span>
+        </label>
+        <label for="auto-refresh">Aggiornamento automatico</label>
+      </div>
+      <button class="btn" onclick="clearLogs()">🗑️ Pulisci log</button>
+      <button class="btn primary" onclick="refreshLogs()">🔄 Aggiorna ora</button>
+      <button class="btn" onclick="openConsole('api')">🖥️ Console API</button>
+      <button class="btn" onclick="openConsole('watcher')">🖥️ Console Watcher</button>
+    </div>
+
+    <div class="log-panels">
+      <div class="log-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="status-indicator" id="api-status"></span>
+            <span>API Server</span>
+          </div>
+          <span style="font-size:11px;color:var(--muted)" id="api-count">0 messaggi</span>
+        </div>
+        <div class="log-content" id="api-logs">
+          <div class="empty-state">Nessun log disponibile</div>
+        </div>
+      </div>
+
+      <div class="log-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span class="status-indicator" id="watcher-status"></span>
+            <span>File Watcher</span>
+          </div>
+          <span style="font-size:11px;color:var(--muted)" id="watcher-count">0 messaggi</span>
+        </div>
+        <div class="log-content" id="watcher-logs">
+          <div class="empty-state">Nessun log disponibile</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let apiLogs = [];
+    let watcherLogs = [];
+    let refreshInterval = null;
+
+    // Gestione tema
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      localStorage.setItem('theme', theme);
+      document.querySelectorAll('.theme-toggle button').forEach(b => {
+        b.classList.toggle('active', b.dataset.theme === theme);
+      });
+    }
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    setTheme(savedTheme);
+
+    // Recupera log dal server
+    async function fetchLogs() {
+      try {
+        const res = await fetch('/api/logs');
+        if (!res.ok) {
+          throw new Error(`HTTP ${res.status}`);
+        }
+        const data = await res.json();
+        
+        apiLogs = data.api || [];
+        watcherLogs = data.watcher || [];
+        
+        renderLogs('api-logs', apiLogs, 'api-count', 'api-status');
+        renderLogs('watcher-logs', watcherLogs, 'watcher-count', 'watcher-status');
+      } catch (e) {
+        console.error('Errore caricamento log:', e);
+        document.getElementById('api-logs').innerHTML = '<div class="empty-state" style="color:var(--error)">Errore: ' + e.message + '</div>';
+        document.getElementById('watcher-logs').innerHTML = '<div class="empty-state" style="color:var(--error)">Errore: ' + e.message + '</div>';
+        document.getElementById('api-status').classList.add('inactive');
+        document.getElementById('watcher-status').classList.add('inactive');
+      }
+    }
+
+    function renderLogs(containerId, logs, countId, statusId) {
+      const container = document.getElementById(containerId);
+      const autoScroll = document.getElementById('auto-scroll').checked;
+      
+      if (logs.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nessun log disponibile</div>';
+        document.getElementById(statusId).classList.add('inactive');
+        document.getElementById(countId).textContent = '0 messaggi';
+        return;
+      }
+
+      document.getElementById(statusId).classList.remove('inactive');
+      document.getElementById(countId).textContent = logs.length + ' messaggi';
+
+      container.innerHTML = logs.map(log => {
+        const type = getLogType(log.message);
+        // Il timestamp è già formattato come stringa dal server
+        const timestamp = log.timestamp || '';
+        return `<div class="log-entry ${type}"><span class="log-timestamp">[${escapeHtml(timestamp)}]</span>${escapeHtml(log.message)}</div>`;
+      }).join('');
+
+      if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function getLogType(message) {
+      const msg = message.toLowerCase();
+      if (msg.includes('error') || msg.includes('errore') || msg.includes('fail')) return 'error';
+      if (msg.includes('warn') || msg.includes('warning')) return 'warning';
+      if (msg.includes('success') || msg.includes('ok') || msg.includes('✓')) return 'success';
+      if (msg.includes('info') || msg.includes('start') || msg.includes('serving')) return 'info';
+      return 'system';
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function clearLogs() {
+      if (confirm('Vuoi cancellare tutti i log?')) {
+        fetch('/api/logs/clear', { method: 'POST' })
+          .then(() => {
+            apiLogs = [];
+            watcherLogs = [];
+            renderLogs('api-logs', apiLogs, 'api-count', 'api-status');
+            renderLogs('watcher-logs', watcherLogs, 'watcher-count', 'watcher-status');
+          })
+          .catch(e => console.error('Errore pulizia log:', e));
+      }
+    }
+
+    function refreshLogs() {
+      fetchLogs();
+    }
+
+    // Auto-refresh
+    document.getElementById('auto-refresh').addEventListener('change', (e) => {
+      if (e.target.checked) {
+        refreshInterval = setInterval(fetchLogs, 2000);
+      } else {
+        clearInterval(refreshInterval);
+        refreshInterval = null;
+      }
+    });
+
+
+    // Gestione finestre console come "figlie" della pagina principale
+    const consoleWindows = { api: null, watcher: null };
+
+    function openConsole(type) {
+      const width = 800;
+      const height = 600;
+      const left = (screen.width - width) / 2;
+      const top = (screen.height - height) / 2;
+      // Se la finestra è già aperta, portala in primo piano
+      if (consoleWindows[type] && !consoleWindows[type].closed) {
+        consoleWindows[type].focus();
+        return;
+      }
+      const win = window.open(
+        `console.html?type=${type}`,
+        `Console-${type}`,
+        `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+      );
+      if (win) {
+        consoleWindows[type] = win;
+        win.focus();
+      }
+    }
+
+    // Le finestre console rimangono indipendenti e non vengono chiuse automaticamente
+    // Si chiuderanno solo quando:
+    // 1. L'utente le chiude manualmente
+    // 2. Il server si ferma (vedranno errore di connessione)
+
+    // Init
+    fetchLogs();
+    refreshInterval = setInterval(fetchLogs, 2000);
+  </script>
+</body>
+</html>

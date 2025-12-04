@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+  <title>Console - AppuntiApp</title>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{background:#0a0a0a;color:#00ff00;font-family:'Courier New',Courier,monospace;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+    .header{background:#1a1a1a;padding:8px 16px;border-bottom:1px solid #333;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+    .title{font-size:14px;font-weight:bold;display:flex;align-items:center;gap:8px}
+    .status{width:8px;height:8px;border-radius:50%;background:#00ff00;animation:pulse 2s infinite}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:0.5}}
+    .controls{display:flex;gap:8px}
+    .btn{background:#1a1a1a;border:1px solid #333;color:#00ff00;padding:4px 12px;cursor:pointer;font-size:11px;font-family:inherit;transition:all 0.2s}
+    .btn:hover{background:#2a2a2a;border-color:#00ff00}
+    .console-content{flex:1;overflow-y:auto;padding:16px;font-size:13px;line-height:1.8;background:#0a0a0a}
+    .log-line{margin-bottom:4px;white-space:pre-wrap;word-break:break-all}
+    .log-line.error{color:#ff4444}
+    .log-line.warning{color:#ffaa00}
+    .log-line.success{color:#44ff44}
+    .log-line.info{color:#44aaff}
+    .log-line.system{color:#888}
+    .timestamp{color:#666;margin-right:8px}
+    .scrollbar-custom::-webkit-scrollbar{width:8px}
+    .scrollbar-custom::-webkit-scrollbar-track{background:#1a1a1a}
+    .scrollbar-custom::-webkit-scrollbar-thumb{background:#333;border-radius:4px}
+    .scrollbar-custom::-webkit-scrollbar-thumb:hover{background:#444}
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="title">
+      <span class="status" id="status"></span>
+      <span id="console-title">Console</span>
+    </div>
+    <div class="controls">
+      <button class="btn" onclick="toggleAutoScroll()" id="scroll-btn">✓ Auto-scroll</button>
+      <button class="btn" onclick="clearConsole()">🗑️ Pulisci</button>
+      <button class="btn" onclick="refreshNow()">🔄</button>
+    </div>
+  </div>
+  <div class="console-content scrollbar-custom" id="console"></div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const consoleType = urlParams.get('type') || 'api';
+    let logs = [];
+    let autoScroll = true;
+    let refreshInterval = null;
+
+    // Set title
+    document.getElementById('console-title').textContent = 
+      consoleType === 'api' ? '🖥️ API Server Console' : '🖥️ File Watcher Console';
+    document.title = `Console ${consoleType.toUpperCase()} - AppuntiApp`;
+
+    let connectionErrors = 0;
+    let closeCountdown = null;
+
+    async function fetchLogs() {
+      try {
+        const res = await fetch('/api/logs');
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        
+        logs = data[consoleType] || [];
+        renderConsole();
+        
+        // Update status indicator
+        document.getElementById('status').style.background = '#00ff00';
+        
+        // Reset error counter on successful connection
+        connectionErrors = 0;
+        if (closeCountdown) {
+          clearInterval(closeCountdown);
+          closeCountdown = null;
+        }
+      } catch (e) {
+        console.error('Errore:', e);
+        connectionErrors++;
+        document.getElementById('status').style.background = '#ff4444';
+        
+        // Start countdown after first error
+        if (connectionErrors === 1 && !closeCountdown) {
+          startCloseCountdown();
+        }
+        
+        document.getElementById('console').innerHTML = 
+          `<div class="log-line error">❌ Errore connessione: ${e.message}</div>`;
+      }
+    }
+
+    function startCloseCountdown() {
+      let countdown = 3;
+      const container = document.getElementById('console');
+      
+      closeCountdown = setInterval(() => {
+        container.innerHTML = 
+          `<div class="log-line error">❌ Errore connessione al server</div>` +
+          `<div class="log-line warning">⚠️ Chiusura automatica in ${countdown} second${countdown !== 1 ? 'i' : 'o'}...</div>`;
+        
+        countdown--;
+        
+        if (countdown < 0) {
+          clearInterval(closeCountdown);
+          window.close();
+        }
+      }, 1000);
+    }
+
+    function renderConsole() {
+      const container = document.getElementById('console');
+      
+      if (logs.length === 0) {
+        container.innerHTML = '<div class="log-line system">>>> Nessun log disponibile. In attesa di eventi...</div>';
+        return;
+      }
+
+      container.innerHTML = logs.map(log => {
+        const type = getLogType(log.message);
+        const timestamp = log.timestamp || '';
+        const symbol = getSymbol(type);
+        return `<div class="log-line ${type}"><span class="timestamp">${escapeHtml(timestamp)}</span>${symbol} ${escapeHtml(log.message)}</div>`;
+      }).join('');
+
+      if (autoScroll) {
+        container.scrollTop = container.scrollHeight;
+      }
+    }
+
+    function getLogType(message) {
+      const msg = message.toLowerCase();
+      if (msg.includes('error') || msg.includes('errore') || msg.includes('fail')) return 'error';
+      if (msg.includes('warn') || msg.includes('warning')) return 'warning';
+      if (msg.includes('success') || msg.includes('✓') || msg.includes('ok')) return 'success';
+      if (msg.includes('info') || msg.includes('start') || msg.includes('serving') || msg.includes('richiesta')) return 'info';
+      return 'system';
+    }
+
+    function getSymbol(type) {
+      switch(type) {
+        case 'error': return '❌';
+        case 'warning': return '⚠️';
+        case 'success': return '✓';
+        case 'info': return '➜';
+        default: return '•';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function toggleAutoScroll() {
+      autoScroll = !autoScroll;
+      const btn = document.getElementById('scroll-btn');
+      btn.textContent = autoScroll ? '✓ Auto-scroll' : '○ Auto-scroll';
+    }
+
+    function clearConsole() {
+      if (confirm('Vuoi cancellare tutti i log?')) {
+        fetch('/api/logs/clear', { method: 'POST' })
+          .then(() => {
+            logs = [];
+            renderConsole();
+          });
+      }
+    }
+
+    function refreshNow() {
+      fetchLogs();
+    }
+
+    // Auto-refresh every 1 second for real-time feel
+    fetchLogs();
+    refreshInterval = setInterval(fetchLogs, 1000);
+
+    // Cleanup on window close
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
+  </script>
+</body>
+</html>

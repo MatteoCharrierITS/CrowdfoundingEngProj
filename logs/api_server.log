@@ -1,0 +1,33 @@
+2025-12-02 16:25:08,509 - INFO - Log cancellati
+2025-12-02 16:29:36,265 - INFO - === API Server avviato su http://localhost:5000 ===
+2025-12-02 16:29:41,545 - INFO - Richiesta lista file
+2025-12-02 16:30:09,505 - INFO - Richiesta lista file
+2025-12-02 16:32:13,507 - INFO - === API Server avviato su http://localhost:5000 ===
+2025-12-02 16:32:18,887 - INFO - Richiesta lista file
+2025-12-02 16:32:33,426 - INFO - Richiesta lista file
+2025-12-02 16:32:52,188 - INFO - Richiesta lista file
+2025-12-02 16:34:00,996 - INFO - === API Server avviato su http://localhost:5000 ===
+2025-12-02 16:34:06,483 - INFO - Richiesta lista file
+2025-12-02 16:34:17,398 - INFO - Richiesta lista file
+2025-12-02 16:34:29,306 - INFO - Richiesta lettura file: Fondamenti di Reti e Calcolatori/01.12.2025 - FReC - Modello ISO-OSI.md
+2025-12-02 16:34:35,835 - INFO - ✓ File aggiornato: Fondamenti di Reti e Calcolatori/01.12.2025 - FReC - Modello ISO-OSI.md
+2025-12-02 16:34:41,299 - INFO - Richiesta lista file
+2025-12-02 16:37:27,074 - INFO - === API Server avviato su http://localhost:5000 ===
+2025-12-02 16:37:32,504 - INFO - Richiesta lista file
+2025-12-02 16:40:57,361 - INFO - === API Server avviato su http://localhost:5000 ===
+2025-12-02 16:41:03,495 - INFO - Richiesta lista file
+2025-12-02 16:41:16,911 - INFO - Richiesta lista file
+2025-12-04 11:12:37,920 - INFO - === API Server avviato su http://localhost:5000 ===
+2025-12-04 11:12:44,819 - INFO - Richiesta lista file
+2025-12-04 11:13:34,894 - INFO - Richiesta lista file
+2025-12-04 11:13:38,312 - INFO - Richiesta lista file
+2025-12-04 11:13:41,134 - INFO - Richiesta lista file
+2025-12-04 11:14:02,003 - INFO - Richiesta lista file
+2025-12-04 11:14:06,721 - INFO - Richiesta lista file
+2025-12-04 11:14:08,153 - INFO - Richiesta lista file
+2025-12-04 11:14:30,706 - INFO - === API Server avviato su http://localhost:5000 ===
+2025-12-04 11:14:35,962 - INFO - Richiesta lista file
+2025-12-04 11:15:07,165 - INFO - Richiesta lista file
+2025-12-04 11:15:41,361 - INFO - ✓ File creato: Project.md (cartella: CrowdFounding Project)
+2025-12-04 11:15:44,262 - INFO - ✓ File aggiornato: CrowdFounding Project/Project.md
+2025-12-04 11:15:45,561 - INFO - Richiesta lista file
